@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ECOPLUG — Smart Energy Management</title>
+  <style>
+    :root{
+      --bg:#f3f7f5;
+      --panel:#ffffff;
+      --panel-2:#f8fbfa;
+      --text:#13251f;
+      --muted:#6d8179;
+      --line:#dce8e3;
+      --green:#20b66f;
+      --green-dark:#0b7d4c;
+      --teal:#0d8f91;
+      --blue:#215a8a;
+      --orange:#f4a340;
+      --red:#dd5b5b;
+      --purple:#7c63d8;
+      --shadow:0 16px 40px rgba(27,74,59,.10);
+      --radius:20px;
+      --sidebar:#0c3d34;
+      --sidebar-2:#082d27;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 8% 4%,rgba(32,182,111,.12),transparent 28%),
+        linear-gradient(135deg,#f8fbfa,#edf5f2);
+    }
+
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .hidden{display:none!important}
+
+    /* Login */
+    .auth-screen{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+    }
+    .auth-visual{
+      background:
+        linear-gradient(rgba(6,50,42,.64),rgba(6,50,42,.86)),
+        radial-gradient(circle at 30% 30%,rgba(36,220,133,.35),transparent 30%),
+        linear-gradient(135deg,#0c6454,#092f29);
+      color:#fff;
+      padding:56px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      overflow:hidden;
+      position:relative;
+    }
+    .auth-visual::after{
+      content:"";
+      position:absolute;
+      width:420px;height:420px;border-radius:50%;
+      right:-170px;bottom:-160px;
+      border:70px solid rgba(255,255,255,.06);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:900;
+      font-size:25px;
+      letter-spacing:.4px;
+      position:relative;
+      z-index:1;
+    }
+    .brand-mark{
+      width:48px;height:48px;border-radius:15px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,#2ed880,#16a2a3);
+      box-shadow:0 12px 28px rgba(24,184,115,.28);
+      font-size:26px;
+    }
+    .auth-copy{max-width:650px;position:relative;z-index:1}
+    .auth-copy h1{
+      font-size:54px;
+      line-height:1.02;
+      margin:0 0 18px;
+      letter-spacing:-2px;
+    }
+    .auth-copy p{
+      font-size:19px;
+      line-height:1.65;
+      color:#d8eee7;
+      max-width:560px;
+    }
+    .auth-points{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      position:relative;z-index:1;
+    }
+    .auth-point{
+      padding:16px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+      border-radius:16px;
+      backdrop-filter:blur(8px);
+    }
+    .auth-point strong{display:block;margin-bottom:4px}
+    .auth-point small{color:#d5ebe4}
+
+    .auth-form-wrap{
+      display:grid;
+      place-items:center;
+      padding:38px;
+    }
+    .auth-card{
+      width:min(430px,100%);
+      background:rgba(255,255,255,.96);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:34px;
+    }
+    .auth-card h2{margin:0;font-size:30px}
+    .auth-card p{color:var(--muted);line-height:1.55}
+    .field{display:grid;gap:7px;margin:16px 0}
+    .field label{font-size:13px;font-weight:800;color:#344f46}
+    .field input,.field select,.field textarea{
+      width:100%;
+      border:1px solid #ccddd7;
+      background:#fff;
+      color:var(--text);
+      border-radius:13px;
+      padding:12px 13px;
+      outline:none;
+      transition:.2s ease;
+    }
+    .field input:focus,.field select:focus,.field textarea:focus{
+      border-color:var(--green);
+      box-shadow:0 0 0 4px rgba(32,182,111,.10);
+    }
+    .btn{
+      border:0;
+      border-radius:13px;
+      padding:11px 15px;
+      font-weight:850;
+      transition:.2s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{
+      background:linear-gradient(135deg,var(--green),var(--teal));
+      color:#fff;
+      box-shadow:0 10px 22px rgba(15,143,145,.22);
+    }
+    .btn.secondary{
+      background:#fff;
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+    .btn.ghost{background:transparent;color:var(--text)}
+    .btn.danger{background:#fff1f1;color:#ad3f3f;border:1px solid #f0caca}
+    .btn.block{width:100%}
+    .tiny{font-size:12px;color:var(--muted)}
+    .auth-hint{
+      margin-top:16px;
+      padding:12px;
+      border-radius:13px;
+      background:#eef9f4;
+      color:#2f6452;
+      font-size:13px;
+      border:1px solid #cfe8dd;
+    }
+
+    /* App shell */
+    .app-shell{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:270px 1fr;
+    }
+    .sidebar{
+      height:100vh;
+      position:sticky;
+      top:0;
+      background:linear-gradient(180deg,var(--sidebar),var(--sidebar-2));
+      color:#fff;
+      padding:22px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+      z-index:20;
+    }
+    .brand small{
+      display:block;
+      font-size:10px;
+      letter-spacing:1.5px;
+      opacity:.7;
+      margin-top:2px;
+    }
+    .account-card{
+      display:flex;
+      gap:11px;
+      align-items:center;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      padding:12px;
+      border-radius:16px;
+    }
+    .avatar{
+      width:42px;height:42px;border-radius:14px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,#26d27d,#1591a0);
+      font-weight:900;
+      flex:0 0 auto;
+    }
+    .account-card strong{display:block;font-size:14px}
+    .account-card small{color:#d0e5de}
+
+    .nav{display:grid;gap:7px;overflow:auto}
+    .nav button{
+      border:0;background:transparent;color:#d5e8e2;
+      padding:12px 13px;border-radius:13px;
+      text-align:left;display:flex;align-items:center;gap:11px;
+      transition:.2s ease;
+    }
+    .nav button:hover,.nav button.active{
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      transform:translateX(2px);
+    }
+    .nav .badge{
+      margin-left:auto;
+      min-width:22px;height:22px;border-radius:999px;
+      display:grid;place-items:center;
+      background:#2cc97a;color:#073b2f;font-size:11px;font-weight:900;
+    }
+    .sidebar-footer{
+      margin-top:auto;
+      display:grid;gap:10px;
+    }
+    .status-card{
+      padding:13px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:15px;
+      background:rgba(255,255,255,.07);
+      font-size:13px;
+    }
+    .status-line{display:flex;justify-content:space-between;gap:10px;margin:6px 0}
+    .status-line span:last-child{color:#9bf0c7}
+
+    .main{
+      min-width:0;
+      padding:22px 28px 42px;
+    }
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      margin-bottom:22px;
+    }
+    .topbar h1{margin:0;font-size:31px;letter-spacing:-.7px}
+    .topbar p{margin:5px 0 0;color:var(--muted)}
+    .top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .search{
+      position:relative;
+    }
+    .search input{
+      width:230px;
+      border:1px solid var(--line);
+      border-radius:13px;
+      background:#fff;
+      padding:11px 13px 11px 38px;
+      outline:none;
+    }
+    .search span{position:absolute;left:13px;top:10px;color:var(--muted)}
+    .icon-btn{
+      width:42px;height:42px;border-radius:13px;border:1px solid var(--line);
+      background:#fff;display:grid;place-items:center;position:relative;
+    }
+    .icon-btn .dot{
+      position:absolute;right:7px;top:7px;width:8px;height:8px;border-radius:50%;
+      background:var(--red);border:2px solid #fff;
+    }
+
+    .page{display:none}
+    .page.active{display:block}
+    .grid{display:grid;gap:17px}
+    .stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:17px}
+    .card{
+      min-width:0;
+      background:rgba(255,255,255,.96);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:19px;
+    }
+    .stat{
+      position:relative;overflow:hidden;
+    }
+    .stat::after{
+      content:"";
+      position:absolute;width:110px;height:110px;border-radius:50%;
+      right:-40px;top:-40px;background:rgba(32,182,111,.08);
+    }
+    .stat .label{
+      color:var(--muted);font-size:12px;font-weight:850;
+      text-transform:uppercase;letter-spacing:.7px;
+    }
+    .stat .value{font-size:30px;font-weight:950;margin:9px 0 3px}
+    .stat .trend{font-size:13px;font-weight:800;color:var(--green-dark)}
+    .stat .trend.warning{color:#a86d12}
+
+    .section-head{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;
+      margin-bottom:15px;
+    }
+    .section-head h2,.section-head h3{margin:0}
+    .section-head p{margin:4px 0 0;color:var(--muted);font-size:14px}
+    .pill{
+      display:inline-flex;align-items:center;gap:7px;
+      border:1px solid var(--line);background:#fff;color:#38564c;
+      padding:8px 11px;border-radius:999px;font-size:12px;font-weight:800;
+    }
+    .online-dot{
+      width:8px;height:8px;border-radius:50%;background:var(--green);
+      box-shadow:0 0 0 4px rgba(32,182,111,.12);
+    }
+    .dashboard-layout{grid-template-columns:1.2fr .8fr;align-items:start}
+    .two-col{grid-template-columns:1fr 1fr}
+    .three-col{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+    /* Energy chart */
+    .chart-wrap{height:280px;position:relative}
+    canvas{width:100%;height:100%;display:block}
+    .chart-legend{
+      display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)
+    }
+    .legend-item{display:flex;align-items:center;gap:7px}
+    .legend-swatch{width:10px;height:10px;border-radius:3px}
+
+    /* Consumption list */
+    .consumer{display:grid;grid-template-columns:120px 1fr 58px;gap:11px;align-items:center;margin:14px 0}
+    .consumer span{font-size:13px;font-weight:800}
+    .bar{height:10px;border-radius:999px;background:#edf2f0;overflow:hidden}
+    .bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--teal),var(--green))}
+    .saving-box{
+      margin-top:15px;padding:15px;border-radius:15px;
+      background:#ecfaf3;border:1px solid #c9ead8;
+    }
+    .saving-box strong{font-size:24px;color:var(--green-dark);display:block}
+
+    /* Rooms */
+    .room-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .room-card{position:relative;overflow:hidden}
+    .room-banner{
+      height:130px;border-radius:17px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:54px;margin-bottom:15px;
+      background:linear-gradient(135deg,#e6f8f0,#eaf4f7);
+      border:1px solid #d6e8e1;
+    }
+    .room-meta{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .room-meta h3{margin:0 0 4px}
+    .room-meta p{margin:0;color:var(--muted);font-size:13px}
+    .state{
+      padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900;
+      background:#e8faf1;color:#0b7d4c;border:1px solid #c2e7d3;
+    }
+    .state.empty{background:#fff7e7;color:#9d6813;border-color:#efd69a}
+    .room-actions{display:flex;gap:8px;margin-top:15px}
+    .room-actions .btn{flex:1}
+
+    /* Devices */
+    .device-toolbar{
+      display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:15px
+    }
+    .filters{display:flex;gap:8px;flex-wrap:wrap}
+    .filter-btn{
+      border:1px solid var(--line);background:#fff;color:#526a62;
+      padding:8px 11px;border-radius:999px;font-weight:800;font-size:12px;
+    }
+    .filter-btn.active{background:#e9f8f1;color:#0a7a4a;border-color:#bde4cf}
+    .device-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .device-card{position:relative;transition:.2s ease}
+    .device-card:hover{transform:translateY(-2px)}
+    .device-icon{
+      width:52px;height:52px;border-radius:16px;display:grid;place-items:center;
+      background:linear-gradient(135deg,#e6fbf2,#e7f5f7);font-size:26px;margin-bottom:13px;
+    }
+    .device-card h3{margin:0 0 4px}
+    .device-card p{margin:0;color:var(--muted);font-size:13px}
+    .device-stats{
+      display:flex;justify-content:space-between;gap:10px;
+      border-top:1px solid var(--line);margin-top:14px;padding-top:12px;font-size:12px;
+    }
+    .device-actions{display:flex;gap:8px;margin-top:13px}
+    .device-actions .btn{flex:1;padding:9px 10px;font-size:12px}
+
+    /* Switch */
+    .switch{
+      width:48px;height:27px;border-radius:999px;background:#c7d5d0;
+      position:relative;cursor:pointer;transition:.24s ease;flex:0 0 auto;
+    }
+    .switch::after{
+      content:"";position:absolute;width:21px;height:21px;border-radius:50%;
+      background:#fff;left:3px;top:3px;box-shadow:0 3px 8px rgba(0,0,0,.18);
+      transition:.24s ease;
+    }
+    .switch.on{background:var(--green)}
+    .switch.on::after{left:24px}
+    .device-card .switch{position:absolute;right:18px;top:18px}
+
+    /* Automations */
+    .automation-list{display:grid;gap:12px}
+    .rule{
+      display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+      border:1px solid var(--line);border-radius:16px;padding:15px;background:#fff;
+    }
+    .rule-icon{
+      width:43px;height:43px;border-radius:13px;display:grid;place-items:center;
+      background:#eef8f4;font-size:20px;
+    }
+    .rule strong{display:block}
+    .rule small{color:var(--muted)}
+    .rule-actions{display:flex;gap:8px;align-items:center}
+
+    /* Reports */
+    .compare-list{display:grid;gap:15px}
+    .compare-item{
+      display:grid;grid-template-columns:180px 1fr 86px;gap:12px;align-items:center;
+    }
+    .compare-item strong{font-size:13px}
+    .compare-track{height:15px;border-radius:999px;background:#edf2f0;overflow:hidden}
+    .compare-track span{display:block;height:100%;border-radius:999px}
+    .cost{background:var(--blue)}
+    .save{background:var(--green)}
+    .report-table{width:100%;border-collapse:collapse}
+    .report-table th,.report-table td{
+      text-align:left;padding:12px;border-bottom:1px solid var(--line);font-size:13px;
+    }
+    .report-table th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+    .positive{color:var(--green-dark);font-weight:900}
+
+    /* Notifications */
+    .notification-list{display:grid;gap:11px}
+    .notification{
+      display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;
+      border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff;
+    }
+    .notification.unread{border-left:4px solid var(--green);background:#fbfefc}
+    .notification-icon{
+      width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+      background:#edf8f3;
+    }
+    .notification h4{margin:0 0 5px}
+    .notification p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+    .notification time{font-size:11px;color:var(--muted)}
+
+    /* Plans */
+    .plans-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .plan-card{position:relative}
+    .plan-card.featured{border:2px solid var(--green);transform:translateY(-4px)}
+    .plan-tag{
+      position:absolute;right:12px;top:12px;padding:6px 8px;border-radius:999px;
+      background:#eafaf2;color:#0b7d4c;font-size:10px;font-weight:950;
+    }
+    .price{font-size:33px;font-weight:950;margin:13px 0}
+    .price small{font-size:12px;color:var(--muted)}
+    .plan-card ul{padding-left:18px;color:#4f665e;line-height:1.8}
+
+    /* Settings */
+    .settings-grid{grid-template-columns:1fr 1fr}
+    .setting-row{
+      display:flex;justify-content:space-between;gap:18px;align-items:center;
+      padding:14px 0;border-bottom:1px solid var(--line);
+    }
+    .setting-row:last-child{border-bottom:0}
+    .setting-row strong{display:block}
+    .setting-row small{color:var(--muted)}
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed;inset:0;background:rgba(5,28,23,.56);
+      display:none;align-items:center;justify-content:center;padding:20px;
+      z-index:100;
+    }
+    .modal-backdrop.show{display:flex}
+    .modal{
+      width:min(560px,100%);
+      max-height:88vh;overflow:auto;
+      background:#fff;border-radius:24px;border:1px solid var(--line);
+      box-shadow:0 28px 80px rgba(0,0,0,.24);
+      padding:22px;
+    }
+    .modal-head{
+      display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px;
+    }
+    .modal-head h3{margin:0}
+    .modal-close{
+      width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:#fff;
+    }
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+    .form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}
+
+    /* Toast */
+    .toast{
+      position:fixed;right:24px;bottom:24px;z-index:150;
+      background:#0d3f35;color:#fff;padding:14px 16px;border-radius:14px;
+      box-shadow:0 18px 45px rgba(0,0,0,.23);
+      opacity:0;transform:translateY(18px);pointer-events:none;transition:.25s ease;
+      max-width:350px;
+    }
+    .toast.show{opacity:1;transform:translateY(0)}
+
+    @media(max-width:1150px){
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .dashboard-layout,.two-col,.settings-grid{grid-template-columns:1fr}
+      .room-grid,.device-grid{grid-template-columns:repeat(2,1fr)}
+      .plans-grid{grid-template-columns:repeat(2,1fr)}
+    }
+
+    @media(max-width:780px){
+      .auth-screen{grid-template-columns:1fr}
+      .auth-visual{display:none}
+      .auth-form-wrap{padding:20px}
+      .app-shell{grid-template-columns:1fr}
+      .sidebar{height:auto;position:static;padding:15px}
+      .account-card,.sidebar-footer{display:none}
+      .nav{grid-template-columns:repeat(4,minmax(100px,1fr));overflow:auto}
+      .nav button{justify-content:center;white-space:nowrap}
+      .main{padding:17px 13px 30px}
+      .topbar{flex-direction:column}
+      .top-actions{justify-content:flex-start}
+      .search input{width:100%}
+      .stats,.room-grid,.device-grid,.plans-grid{grid-template-columns:1fr}
+      .three-col{grid-template-columns:1fr}
+      .compare-item{grid-template-columns:1fr}
+      .form-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGIN -->
+  <section class="auth-screen" id="authScreen">
+    <div class="auth-visual">
+      <div class="brand">
+        <div class="brand-mark">🌿</div>
+        <div>ECOPLUG<small>SMART ENERGY MANAGEMENT</small></div>
+      </div>
+
+      <div class="auth-copy">
+        <h1>Smarter spaces.<br>Lower energy bills.</h1>
+        <p>Monitor, automate, and control energy use across homes, offices, schools, and businesses from one connected platform.</p>
+      </div>
+
+      <div class="auth-points">
+        <div class="auth-point"><strong>Track</strong><small>See which devices use the most electricity.</small></div>
+        <div class="auth-point"><strong>Detect</strong><small>Know when rooms or work areas are empty.</small></div>
+        <div class="auth-point"><strong>Act</strong><small>Reduce wasted energy automatically.</small></div>
+      </div>
+    </div>
+
+    <div class="auth-form-wrap">
+      <form class="auth-card" id="loginForm">
+        <h2>Welcome back</h2>
+        <p>Sign in to manage your ECOPLUG system.</p>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" value="demo@ecoplug.app" required />
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" value="ecoplug123" required />
+        </div>
+
+        <button class="btn primary block" type="submit">Sign in</button>
+
+        <div class="auth-hint">
+          Prototype access is already filled in. Press <strong>Sign in</strong>.
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <div class="app-shell hidden" id="appShell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">🌿</div>
+        <div>ECOPLUG<small>SMART ENERGY SYSTEM</small></div>
+      </div>
+
+      <div class="account-card">
+        <div class="avatar">OG</div>
+        <div>
+          <strong>Oscar Godinez</strong>
+          <small id="currentPlanLabel">Home Plan</small>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <button class="active" data-page="dashboard">🏠 Dashboard</button>
+        <button data-page="spaces">🏢 Spaces</button>
+        <button data-page="devices">🔌 Devices</button>
+        <button data-page="automations">⚙️ Automations</button>
+        <button data-page="reports">📊 Reports</button>
+        <button data-page="notifications">🔔 Notifications <span class="badge" id="navNotificationBadge">3</span></button>
+        <button data-page="plans">💳 Plans</button>
+        <button data-page="settings">🛠️ Settings</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-card">
+          <div class="status-line"><span>Gateway</span><span id="gatewayStatus">Online</span></div>
+          <div class="status-line"><span>Connected devices</span><span id="sideDeviceCount">6</span></div>
+          <div class="status-line"><span>Automation</span><span>Enabled</span></div>
+        </div>
+        <button class="btn secondary block" id="logoutBtn">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">Energy Dashboard</h1>
+          <p id="pageSubtitle">Monitor your spaces, devices, savings, and automation in real time.</p>
+        </div>
+
+        <div class="top-actions">
+          <div class="search">
+            <span>⌕</span>
+            <input id="globalSearch" placeholder="Search devices or spaces" />
+          </div>
+          <button class="icon-btn" id="notificationBtn" aria-label="Notifications">🔔<span class="dot"></span></button>
+          <button class="btn primary" id="quickOptimizeBtn">⚡ Optimize now</button>
+        </div>
+      </header>
+
+      <!-- DASHBOARD -->
+      <section class="page active" id="dashboard">
+        <div class="grid stats">
+          <article class="card stat">
+            <div class="label">Energy this month</div>
+            <div class="value" id="statEnergy">863 kWh</div>
+            <div class="trend">↓ 12.3% vs previous month</div>
+          </article>
+
+          <article class="card stat">
+            <div class="label">Estimated bill</div>
+            <div class="value" id="statBill">$148.79</div>
+            <div class="trend">$15.18 saved this month</div>
+          </article>
+
+          <article class="card stat">
+            <div class="label">Active devices</div>
+            <div class="value" id="statDevices">5 / 6</div>
+            <div class="trend">1 device currently off</div>
+          </article>
+
+          <article class="card stat">
+            <div class="label">Automations today</div>
+            <div class="value" id="statActions">14</div>
+            <div class="trend warning">3 high-use events prevented</div>
+          </article>
+        </div>
+
+        <div class="grid dashboard-layout">
+          <article class="card">
+            <div class="section-head">
+              <div>
+                <h2>Energy Usage</h2>
+                <p>Daily consumption for the last 7 days</p>
+              </div>
+              <select id="dashboardRange" class="pill">
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+              </select>
+            </div>
+            <div class="chart-wrap"><canvas id="energyChart"></canvas></div>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="legend-swatch" style="background:#20b66f"></span>Actual usage</span>
+              <span class="legend-item"><span class="legend-swatch" style="background:#a9d8c2"></span>Without ECOPLUG</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="section-head">
+              <div>
+                <h2>Top Energy Consumers</h2>
+                <p>Current monthly distribution</p>
+              </div>
+            </div>
+
+            <div class="consumer"><span>Air conditioning</span><div class="bar"><i style="width:78%"></i></div><strong>38%</strong></div>
+            <div class="consumer"><span>Computers</span><div class="bar"><i style="width:58%"></i></div><strong>27%</strong></div>
+            <div class="consumer"><span>Refrigerator</span><div class="bar"><i style="width:40%"></i></div><strong>16%</strong></div>
+            <div class="consumer"><span>Lighting</span><div class="bar"><i style="width:26%"></i></div><strong>10%</strong></div>
+            <div class="consumer"><span>Other devices</span><div class="bar"><i style="width:22%"></i></div><strong>9%</strong></div>
+
+            <div class="saving-box">
+              <strong>$182 projected yearly savings</strong>
+              <span class="tiny">Based on your current plan, rate, and automation history.</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="grid two-col" style="margin-top:17px">
+          <article class="card">
+            <div class="section-head">
+              <div>
+                <h2>Space Status</h2>
+                <p>Live occupancy and power state</p>
+              </div>
+              <button class="btn secondary" data-page-jump="spaces">View all</button>
+            </div>
+            <div id="dashboardSpaceList"></div>
+          </article>
+
+          <article class="card">
+            <div class="section-head">
+              <div>
+                <h2>Recent Activity</h2>
+                <p>Latest ECOPLUG actions</p>
+              </div>
+              <button class="btn secondary" data-page-jump="notifications">View all</button>
+            </div>
+            <div id="recentActivity"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- SPACES -->
+      <section class="page" id="spaces">
+        <div class="section-head">
+          <div>
+            <h2>Spaces</h2>
+            <p>Manage rooms, work areas, occupancy sensors, and automatic actions.</p>
+          </div>
+          <button class="btn primary" id="addSpaceBtn">+ Add space</button>
+        </div>
+        <div class="grid room-grid" id="spaceGrid"></div>
+      </section>
+
+      <!-- DEVICES -->
+      <section class="page" id="devices">
+        <div class="section-head">
+          <div>
+            <h2>Devices</h2>
+            <p>Control regular appliances connected through ECOPLUG smart plugs.</p>
+          </div>
+          <button class="btn primary" id="addDeviceBtn">+ Pair device</button>
+        </div>
+
+        <div class="device-toolbar">
+          <div class="filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="on">On</button>
+            <button class="filter-btn" data-filter="off">Off</button>
+            <button class="filter-btn" data-filter="high">High use</button>
+          </div>
+          <span class="tiny" id="deviceSummary"></span>
+        </div>
+
+        <div class="grid device-grid" id="deviceGrid"></div>
+      </section>
+
+      <!-- AUTOMATIONS -->
+      <section class="page" id="automations">
+        <div class="section-head">
+          <div>
+            <h2>Automations</h2>
+            <p>Create rules that save energy without depending on human memory.</p>
+          </div>
+          <button class="btn primary" id="addRuleBtn">+ New automation</button>
+        </div>
+        <div class="automation-list" id="automationList"></div>
+      </section>
+
+      <!-- REPORTS -->
+      <section class="page" id="reports">
+        <div class="grid two-col">
+          <article class="card">
+            <div class="section-head">
+              <div>
+                <h2>Cost vs Savings</h2>
+                <p>Monthly estimate including the Home Plan license.</p>
+              </div>
+              <button class="btn secondary" id="exportBtn">Export CSV</button>
+            </div>
+
+            <div class="compare-list">
+              <div class="compare-item"><strong>Without ECOPLUG</strong><div class="compare-track"><span class="cost" style="width:100%"></span></div><strong>$163.97</strong></div>
+              <div class="compare-item"><strong>After energy reduction</strong><div class="compare-track"><span class="save" style="width:87.7%"></span></div><strong>$143.80</strong></div>
+              <div class="compare-item"><strong>Final cost + license</strong><div class="compare-track"><span class="save" style="width:90.7%"></span></div><strong>$148.79</strong></div>
+            </div>
+
+            <div class="saving-box">
+              <strong>$15.18 net monthly savings</strong>
+              <span class="tiny">Approximately $182.16 per year.</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="section-head">
+              <div>
+                <h2>Monthly Savings Trend</h2>
+                <p>Estimated savings generated by automation.</p>
+              </div>
+            </div>
+            <div class="chart-wrap"><canvas id="savingsChart"></canvas></div>
+          </article>
+        </div>
+
+        <article class="card" style="margin-top:17px">
+          <div class="section-head">
+            <div>
+              <h2>Device Report</h2>
+              <p>Energy use, estimated cost, and savings by connected device.</p>
+            </div>
+          </div>
+          <div style="overflow:auto">
+            <table class="report-table">
+              <thead>
+                <tr><th>Device</th><th>Space</th><th>Usage</th><th>Cost</th><th>Savings</th><th>Status</th></tr>
+              </thead>
+              <tbody id="reportTableBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section class="page" id="notifications">
+        <div class="section-head">
+          <div>
+            <h2>Notifications</h2>
+            <p>Energy alerts, automation activity, and system updates.</p>
+          </div>
+          <button class="btn secondary" id="markAllReadBtn">Mark all as read</button>
+        </div>
+        <div class="notification-list" id="notificationList"></div>
+      </section>
+
+      <!-- PLANS -->
+      <section class="page" id="plans">
+        <div class="section-head">
+          <div>
+            <h2>Plans & Licenses</h2>
+            <p>Hardware is purchased once; software features depend on the selected plan.</p>
+          </div>
+        </div>
+        <div class="grid plans-grid" id="plansGrid"></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="page" id="settings">
+        <div class="grid settings-grid">
+          <article class="card">
+            <div class="section-head"><h2>Energy Settings</h2></div>
+
+            <div class="setting-row">
+              <div><strong>Electricity rate</strong><small>Used to estimate monthly cost.</small></div>
+              <input id="rateInput" type="number" min="0.01" step="0.01" style="width:110px" />
+            </div>
+
+            <div class="setting-row">
+              <div><strong>Currency</strong><small>Display currency for reports.</small></div>
+              <select id="currencySelect">
+                <option value="$">USD ($)</option>
+                <option value="Q">GTQ (Q)</option>
+              </select>
+            </div>
+
+            <div class="setting-row">
+              <div><strong>Offline fallback</strong><small>Continue using saved automation rules without internet.</small></div>
+              <div class="switch on" id="offlineFallbackSwitch"></div>
+            </div>
+
+            <div class="setting-row">
+              <div><strong>High-use alerts</strong><small>Warn when a device exceeds its normal consumption.</small></div>
+              <div class="switch on" id="highUseSwitch"></div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="section-head"><h2>Account & System</h2></div>
+
+            <div class="setting-row">
+              <div><strong>Wi‑Fi gateway</strong><small>Connection between app, sensors, and plugs.</small></div>
+              <div class="switch on" id="wifiSwitch"></div>
+            </div>
+
+            <div class="setting-row">
+              <div><strong>Current plan</strong><small id="settingsPlanLabel">Home Plan · $4.99/month</small></div>
+              <button class="btn secondary" data-page-jump="plans">Manage</button>
+            </div>
+
+            <div class="setting-row">
+              <div><strong>Download local backup</strong><small>Export the current prototype data as JSON.</small></div>
+              <button class="btn secondary" id="backupBtn">Download</button>
+            </div>
+
+            <div class="setting-row">
+              <div><strong>Reset application</strong><small>Restore the original data and settings.</small></div>
+              <button class="btn danger" id="resetAppBtn">Reset</button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODALS -->
+  <div class="modal-backdrop" id="deviceModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Pair a new device</h3>
+        <button class="modal-close" data-close-modal="deviceModal">✕</button>
+      </div>
+      <form id="deviceForm">
+        <div class="form-grid">
+          <div class="field">
+            <label>Device name</label>
+            <input id="newDeviceName" required placeholder="Example: Desk Lamp" />
+          </div>
+          <div class="field">
+            <label>Device type</label>
+            <select id="newDeviceType">
+              <option value="💡">Light</option>
+              <option value="🌀">Fan</option>
+              <option value="🖥️">Computer / Monitor</option>
+              <option value="📺">TV</option>
+              <option value="☕">Small appliance</option>
+              <option value="🔌">Other device</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Space</label>
+            <select id="newDeviceSpace"></select>
+          </div>
+          <div class="field">
+            <label>Power rating (W)</label>
+            <input id="newDeviceWatts" type="number" min="1" value="25" required />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn secondary" data-close-modal="deviceModal">Cancel</button>
+          <button type="submit" class="btn primary">Pair device</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="spaceModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Add a new space</h3>
+        <button class="modal-close" data-close-modal="spaceModal">✕</button>
+      </div>
+      <form id="spaceForm">
+        <div class="form-grid">
+          <div class="field">
+            <label>Space name</label>
+            <input id="newSpaceName" required placeholder="Example: Meeting Room" />
+          </div>
+          <div class="field">
+            <label>Icon</label>
+            <select id="newSpaceIcon">
+              <option>🏠</option>
+              <option>💻</option>
+              <option>🛋️</option>
+              <option>🍳</option>
+              <option>🏢</option>
+              <option>🎓</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn secondary" data-close-modal="spaceModal">Cancel</button>
+          <button type="submit" class="btn primary">Add space</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="ruleModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Create automation</h3>
+        <button class="modal-close" data-close-modal="ruleModal">✕</button>
+      </div>
+      <form id="ruleForm">
+        <div class="field">
+          <label>Automation name</label>
+          <input id="newRuleName" required placeholder="Example: Turn off empty room" />
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Trigger</label>
+            <select id="newRuleTrigger">
+              <option value="No presence detected">No presence detected</option>
+              <option value="High energy use detected">High energy use detected</option>
+              <option value="Scheduled time reached">Scheduled time reached</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Action</label>
+            <select id="newRuleAction">
+              <option value="Turn off connected devices">Turn off connected devices</option>
+              <option value="Send a notification">Send a notification</option>
+              <option value="Activate low-power mode">Activate low-power mode</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn secondary" data-close-modal="ruleModal">Cancel</button>
+          <button type="submit" class="btn primary">Create automation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="deviceDetailModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="deviceDetailTitle">Device details</h3>
+        <button class="modal-close" data-close-modal="deviceDetailModal">✕</button>
+      </div>
+      <div id="deviceDetailContent"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Saved.</div>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "ecoplug_full_app_v1";
+
+    const defaultState = {
+      signedIn:false,
+      currentPlan:"Home",
+      rate:0.19,
+      currency:"$",
+      wifi:true,
+      offlineFallback:true,
+      highUseAlerts:true,
+      monthlyEnergy:863,
+      baseBill:163.97,
+      reducedBill:143.80,
+      finalBill:148.79,
+      actionsToday:14,
+      selectedDeviceFilter:"all",
+      spaces:[
+        {id:"office",name:"Home Office",icon:"💻",occupied:true,sensor:true},
+        {id:"living",name:"Living Room",icon:"🛋️",occupied:false,sensor:true},
+        {id:"kitchen",name:"Kitchen",icon:"🍳",occupied:true,sensor:true}
+      ],
+      devices:[
+        {id:"lamp",name:"Desk Lamp",icon:"💡",space:"office",watts:18,on:true,usage:0.34,cost:1.94,savings:0.72,high:false},
+        {id:"monitor",name:"Main Monitor",icon:"🖥️",space:"office",watts:45,on:true,usage:1.08,cost:6.16,savings:2.15,high:false},
+        {id:"fan",name:"USB Fan",icon:"🌀",space:"office",watts:12,on:true,usage:0.21,cost:1.20,savings:0.46,high:false},
+        {id:"tv",name:"Living Room TV",icon:"📺",space:"living",watts:72,on:false,usage:0.92,cost:5.24,savings:1.87,high:false},
+        {id:"fridge",name:"Refrigerator",icon:"🧊",space:"kitchen",watts:140,on:true,usage:2.41,cost:13.74,savings:2.08,high:true},
+        {id:"coffee",name:"Coffee Maker",icon:"☕",space:"kitchen",watts:900,on:true,usage:0.48,cost:2.74,savings:0.80,high:true}
+      ],
+      automations:[
+        {id:"r1",icon:"🚶",name:"Empty room shutdown",trigger:"No presence for 2 minutes",action:"Turn off non-essential devices",enabled:true},
+        {id:"r2",icon:"🌙",name:"Night energy mode",trigger:"Every day at 10:30 PM",action:"Reduce standby consumption",enabled:true},
+        {id:"r3",icon:"⚡",name:"High-use alert",trigger:"20% above normal use",action:"Send notification",enabled:true},
+        {id:"r4",icon:"📴",name:"Offline fallback",trigger:"Internet connection lost",action:"Use last saved local rules",enabled:true}
+      ],
+      notifications:[
+        {id:"n1",icon:"⚡",title:"High energy use detected",message:"The refrigerator is using 18% more energy than its normal average.",time:"5 min ago",unread:true},
+        {id:"n2",icon:"🚶",title:"Living Room optimized",message:"No presence was detected. TV and connected lighting were turned off.",time:"22 min ago",unread:true},
+        {id:"n3",icon:"💰",title:"Savings goal reached",message:"You have saved an estimated $15.18 this month.",time:"Today",unread:true},
+        {id:"n4",icon:"🔄",title:"System synchronized",message:"All offline activity has been uploaded successfully.",time:"Yesterday",unread:false}
+      ]
+    };
+
+    let state = loadState();
+
+    const pageMeta = {
+      dashboard:["Energy Dashboard","Monitor your spaces, devices, savings, and automation in real time."],
+      spaces:["Spaces","Manage rooms, work areas, occupancy sensors, and automatic actions."],
+      devices:["Devices","Control regular appliances through ECOPLUG smart plugs."],
+      automations:["Automations","Create rules that save energy without depending on human memory."],
+      reports:["Reports","Review consumption, cost, savings, and device performance."],
+      notifications:["Notifications","Energy alerts, automation activity, and system updates."],
+      plans:["Plans & Licenses","Choose the right level of monitoring, automation, and support."],
+      settings:["Settings","Manage rates, offline behavior, connectivity, and account options."]
+    };
+
+    const plans = [
+      {name:"Free",price:"$0",suffix:"/ month",features:["Up to 2 devices","Basic reports","Limited automation","Ads included"]},
+      {name:"Home",price:"$4.99",suffix:"/ month",features:["Up to 6 devices","Full monitoring","Smart automations","Detailed reports"],featured:true},
+      {name:"Student / Senior",price:"$2.99",suffix:"/ month",features:["Discounted access","Accessibility options","More connected devices","Basic reports"]},
+      {name:"Business",price:"From $49",suffix:"/ month",features:["Multiple users","Detailed analytics","Bulk-device control","Enterprise upgrades"]}
+    ];
+
+    function loadState(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return saved ? {...structuredClone(defaultState), ...saved} : structuredClone(defaultState);
+      }catch{
+        return structuredClone(defaultState);
+      }
+    }
+
+    function saveState(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function formatMoney(value){
+      return `${state.currency}${Number(value).toFixed(2)}`;
+    }
+
+    function showToast(message){
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(()=>toast.classList.remove("show"),2600);
+    }
+
+    function openModal(id){
+      document.getElementById(id)?.classList.add("show");
+    }
+
+    function closeModal(id){
+      document.getElementById(id)?.classList.remove("show");
+    }
+
+    function openPage(pageId){
+      document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+      document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+
+      document.getElementById(pageId)?.classList.add("active");
+      document.querySelector(`.nav button[data-page="${pageId}"]`)?.classList.add("active");
+
+      document.getElementById("pageTitle").textContent = pageMeta[pageId][0];
+      document.getElementById("pageSubtitle").textContent = pageMeta[pageId][1];
+
+      if(pageId === "dashboard") drawEnergyChart();
+      if(pageId === "reports") drawSavingsChart();
+      if(pageId === "notifications") renderNotifications();
+    }
+
+    function getSpace(spaceId){
+      return state.spaces.find(s=>s.id===spaceId);
+    }
+
+    function addNotification(icon,title,message){
+      state.notifications.unshift({
+        id:"n"+Date.now(),
+        icon,title,message,time:"Just now",unread:true
+      });
+      saveState();
+      updateNotificationBadges();
+    }
+
+    function setDevicePower(deviceId,on,notify=true){
+      const device = state.devices.find(d=>d.id===deviceId);
+      if(!device) return;
+      device.on = on;
+      if(notify){
+        addNotification(on ? "🔌":"🌿",
+          `${device.name} turned ${on ? "on":"off"}`,
+          `${device.name} in ${getSpace(device.space)?.name || "Unknown space"} was ${on ? "activated":"turned off"}.`);
+      }
+      saveState();
+      renderAll();
+    }
+
+    function setSpaceOccupancy(spaceId,occupied){
+      const space = getSpace(spaceId);
+      if(!space) return;
+      space.occupied = occupied;
+
+      if(!occupied){
+        const affected = state.devices.filter(d=>d.space===spaceId && d.id!=="fridge");
+        affected.forEach(d=>d.on=false);
+        state.actionsToday += affected.length;
+        addNotification("🚶",`${space.name} optimized`,
+          `No presence was detected. ${affected.length} connected device${affected.length===1?"":"s"} were turned off.`);
+      }else{
+        addNotification("✅",`${space.name} occupied`,
+          `Presence was detected. Devices remain available for manual or automatic control.`);
+      }
+
+      saveState();
+      renderAll();
+    }
+
+    function optimizeNow(){
+      let changed = 0;
+      state.spaces.filter(s=>!s.occupied).forEach(space=>{
+        state.devices.filter(d=>d.space===space.id && d.on && d.id!=="fridge").forEach(device=>{
+          device.on=false;
+          changed++;
+        });
+      });
+
+      state.devices.filter(d=>d.high && d.on).forEach(device=>{
+        if(device.id!=="fridge"){
+          device.on=false;
+          changed++;
+        }
+      });
+
+      state.actionsToday += changed;
+      addNotification("⚡","Quick optimization complete",
+        changed ? `${changed} device${changed===1?"":"s"} were optimized to reduce unnecessary energy use.` : "No additional energy waste was detected.");
+      saveState();
+      renderAll();
+      showToast(changed ? `${changed} device${changed===1?"":"s"} optimized.` : "Everything is already optimized.");
+    }
+
+    function renderDashboard(){
+      const active = state.devices.filter(d=>d.on).length;
+      document.getElementById("statEnergy").textContent = `${state.monthlyEnergy} kWh`;
+      document.getElementById("statBill").textContent = formatMoney(state.finalBill);
+      document.getElementById("statDevices").textContent = `${active} / ${state.devices.length}`;
+      document.getElementById("statActions").textContent = state.actionsToday;
+
+      const spaceList = document.getElementById("dashboardSpaceList");
+      spaceList.innerHTML = state.spaces.map(space=>{
+        const devices = state.devices.filter(d=>d.space===space.id);
+        const activeCount = devices.filter(d=>d.on).length;
+        return `
+          <div class="setting-row">
+            <div>
+              <strong>${space.icon} ${space.name}</strong>
+              <small>${activeCount} of ${devices.length} devices active</small>
+            </div>
+            <span class="state ${space.occupied ? "" : "empty"}">${space.occupied ? "Occupied":"Empty"}</span>
+          </div>
+        `;
+      }).join("");
+
+      const recent = document.getElementById("recentActivity");
+      recent.innerHTML = state.notifications.slice(0,4).map(n=>`
+        <div class="setting-row">
+          <div>
+            <strong>${n.icon} ${n.title}</strong>
+            <small>${n.time}</small>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderSpaces(){
+      const grid = document.getElementById("spaceGrid");
+      grid.innerHTML = state.spaces.map(space=>{
+        const devices = state.devices.filter(d=>d.space===space.id);
+        const activeCount = devices.filter(d=>d.on).length;
+        return `
+          <article class="card room-card">
+            <div class="room-banner">${space.icon}</div>
+            <div class="room-meta">
+              <div>
+                <h3>${space.name}</h3>
+                <p>${devices.length} connected device${devices.length===1?"":"s"} · ${activeCount} active</p>
+              </div>
+              <span class="state ${space.occupied ? "" : "empty"}">${space.occupied ? "Occupied":"Empty"}</span>
+            </div>
+            <div class="room-actions">
+              <button class="btn secondary" onclick="setSpaceOccupancy('${space.id}', ${!space.occupied})">
+                ${space.occupied ? "Set as empty":"Set as occupied"}
+              </button>
+              <button class="btn primary" onclick="openSpaceDevices('${space.id}')">View devices</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    window.openSpaceDevices = function(spaceId){
+      state.selectedDeviceFilter = "all";
+      document.getElementById("globalSearch").value = getSpace(spaceId)?.name || "";
+      openPage("devices");
+      renderDevices(spaceId);
+    };
+
+    function renderDevices(forceSpace=null){
+      const grid = document.getElementById("deviceGrid");
+      const query = document.getElementById("globalSearch").value.trim().toLowerCase();
+      const filter = state.selectedDeviceFilter;
+
+      let devices = state.devices.filter(device=>{
+        const spaceName = getSpace(device.space)?.name || "";
+        const matchesQuery = !query || device.name.toLowerCase().includes(query) || spaceName.toLowerCase().includes(query);
+        const matchesFilter =
+          filter==="all" ||
+          (filter==="on" && device.on) ||
+          (filter==="off" && !device.on) ||
+          (filter==="high" && device.high);
+        const matchesSpace = !forceSpace || device.space===forceSpace;
+        return matchesQuery && matchesFilter && matchesSpace;
+      });
+
+      grid.innerHTML = devices.map(device=>{
+        const space = getSpace(device.space);
+        return `
+          <article class="card device-card">
+            <div class="device-icon">${device.icon}</div>
+            <div class="switch ${device.on ? "on":""}" onclick="setDevicePower('${device.id}', ${!device.on})"></div>
+            <h3>${device.name}</h3>
+            <p>${space?.name || "Unknown space"} · ${device.high ? "High-use alert":"Normal usage"}</p>
+            <div class="device-stats">
+              <span>${device.usage.toFixed(2)} kWh today</span>
+              <strong>${device.watts} W</strong>
+            </div>
+            <div class="device-actions">
+              <button class="btn secondary" onclick="openDeviceDetails('${device.id}')">Details</button>
+              <button class="btn ${device.on ? "danger":"primary"}" onclick="setDevicePower('${device.id}', ${!device.on})">${device.on ? "Turn off":"Turn on"}</button>
+            </div>
+          </article>
+        `;
+      }).join("") || `<article class="card"><strong>No devices found.</strong><p class="tiny">Try another search or filter.</p></article>`;
+
+      document.getElementById("deviceSummary").textContent = `${devices.length} device${devices.length===1?"":"s"} shown`;
+      document.getElementById("sideDeviceCount").textContent = state.devices.length;
+    }
+
+    window.setDevicePower = setDevicePower;
+
+    window.openDeviceDetails = function(deviceId){
+      const device = state.devices.find(d=>d.id===deviceId);
+      if(!device) return;
+      document.getElementById("deviceDetailTitle").textContent = device.name;
+      document.getElementById("deviceDetailContent").innerHTML = `
+        <div class="grid two-col">
+          <div class="card" style="box-shadow:none">
+            <div class="device-icon">${device.icon}</div>
+            <strong>Status</strong>
+            <p>${device.on ? "Currently on":"Currently off"}</p>
+          </div>
+          <div class="card" style="box-shadow:none">
+            <strong>Location</strong>
+            <p>${getSpace(device.space)?.name || "Unknown"}</p>
+          </div>
+          <div class="card" style="box-shadow:none">
+            <strong>Today's usage</strong>
+            <p>${device.usage.toFixed(2)} kWh</p>
+          </div>
+          <div class="card" style="box-shadow:none">
+            <strong>Estimated monthly savings</strong>
+            <p>${formatMoney(device.savings)}</p>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn secondary" onclick="closeModal('deviceDetailModal')">Close</button>
+          <button class="btn ${device.on ? "danger":"primary"}" onclick="setDevicePower('${device.id}', ${!device.on}); closeModal('deviceDetailModal')">${device.on ? "Turn off":"Turn on"}</button>
+        </div>
+      `;
+      openModal("deviceDetailModal");
+    };
+
+    function renderAutomations(){
+      document.getElementById("automationList").innerHTML = state.automations.map(rule=>`
+        <div class="rule">
+          <div class="rule-icon">${rule.icon}</div>
+          <div>
+            <strong>${rule.name}</strong>
+            <small>${rule.trigger} → ${rule.action}</small>
+          </div>
+          <div class="rule-actions">
+            <div class="switch ${rule.enabled ? "on":""}" onclick="toggleRule('${rule.id}')"></div>
+            <button class="btn danger" onclick="deleteRule('${rule.id}')">Delete</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    window.toggleRule = function(ruleId){
+      const rule = state.automations.find(r=>r.id===ruleId);
+      if(!rule) return;
+      rule.enabled = !rule.enabled;
+      saveState();
+      renderAutomations();
+      showToast(`${rule.name} ${rule.enabled ? "enabled":"disabled"}.`);
+    };
+
+    window.deleteRule = function(ruleId){
+      state.automations = state.automations.filter(r=>r.id!==ruleId);
+      saveState();
+      renderAutomations();
+      showToast("Automation deleted.");
+    };
+
+    function renderReports(){
+      document.getElementById("reportTableBody").innerHTML = state.devices.map(device=>`
+        <tr>
+          <td>${device.icon} ${device.name}</td>
+          <td>${getSpace(device.space)?.name || "Unknown"}</td>
+          <td>${device.usage.toFixed(2)} kWh/day</td>
+          <td>${formatMoney(device.cost)}</td>
+          <td class="positive">${formatMoney(device.savings)}</td>
+          <td>${device.on ? "On":"Off"}</td>
+        </tr>
+      `).join("");
+      drawSavingsChart();
+    }
+
+    function renderNotifications(){
+      const list = document.getElementById("notificationList");
+      list.innerHTML = state.notifications.map(n=>`
+        <article class="notification ${n.unread ? "unread":""}">
+          <div class="notification-icon">${n.icon}</div>
+          <div>
+            <h4>${n.title}</h4>
+            <p>${n.message}</p>
+          </div>
+          <time>${n.time}</time>
+        </article>
+      `).join("");
+      updateNotificationBadges();
+    }
+
+    function updateNotificationBadges(){
+      const unread = state.notifications.filter(n=>n.unread).length;
+      document.getElementById("navNotificationBadge").textContent = unread;
+      document.getElementById("navNotificationBadge").style.display = unread ? "grid":"none";
+      document.querySelector("#notificationBtn .dot").style.display = unread ? "block":"none";
+    }
+
+    function renderPlans(){
+      document.getElementById("plansGrid").innerHTML = plans.map(plan=>`
+        <article class="card plan-card ${plan.featured ? "featured":""}">
+          ${plan.featured ? '<div class="plan-tag">MOST POPULAR</div>':""}
+          <h3>${plan.name}</h3>
+          <div class="price">${plan.price} <small>${plan.suffix}</small></div>
+          <ul>${plan.features.map(f=>`<li>${f}</li>`).join("")}</ul>
+          <button class="btn ${state.currentPlan===plan.name ? "secondary":"primary"} block" onclick="selectPlan('${plan.name}')">
+            ${state.currentPlan===plan.name ? "Current plan":"Choose plan"}
+          </button>
+        </article>
+      `).join("");
+    }
+
+    window.selectPlan = function(planName){
+      state.currentPlan = planName;
+      saveState();
+      renderPlans();
+      updatePlanLabels();
+      showToast(`${planName} plan selected.`);
+    };
+
+    function updatePlanLabels(){
+      const planText = state.currentPlan==="Home" ? "Home Plan" : `${state.currentPlan} Plan`;
+      document.getElementById("currentPlanLabel").textContent = planText;
+      document.getElementById("settingsPlanLabel").textContent = planText;
+    }
+
+    function renderSettings(){
+      document.getElementById("rateInput").value = state.rate;
+      document.getElementById("currencySelect").value = state.currency;
+      document.getElementById("wifiSwitch").classList.toggle("on",state.wifi);
+      document.getElementById("offlineFallbackSwitch").classList.toggle("on",state.offlineFallback);
+      document.getElementById("highUseSwitch").classList.toggle("on",state.highUseAlerts);
+      document.getElementById("gatewayStatus").textContent = state.wifi ? "Online":"Offline";
+      document.getElementById("gatewayStatus").style.color = state.wifi ? "#9bf0c7":"#ffc9c9";
+      updatePlanLabels();
+    }
+
+    function renderAll(){
+      renderDashboard();
+      renderSpaces();
+      renderDevices();
+      renderAutomations();
+      renderReports();
+      renderNotifications();
+      renderPlans();
+      renderSettings();
+      drawEnergyChart();
+      updateNotificationBadges();
+    }
+
+    function drawLineChart(canvasId,values,compareValues,labels,colors){
+      const canvas = document.getElementById(canvasId);
+      if(!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = Math.max(600,rect.width*ratio);
+      canvas.height = Math.max(280,rect.height*ratio);
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(ratio,0,0,ratio,0,0);
+
+      const w = canvas.width/ratio;
+      const h = canvas.height/ratio;
+      const pad = {l:42,r:18,t:18,b:32};
+      ctx.clearRect(0,0,w,h);
+
+      const all = compareValues ? [...values,...compareValues] : [...values];
+      const max = Math.max(...all)*1.16;
+      const min = 0;
+
+      ctx.strokeStyle="#e4ece8";
+      ctx.lineWidth=1;
+      ctx.fillStyle="#7a8f87";
+      ctx.font="11px system-ui";
+
+      for(let i=0;i<5;i++){
+        const y = pad.t + (h-pad.t-pad.b)*(i/4);
+        ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
+        const val = Math.round(max-(max-min)*(i/4));
+        ctx.fillText(String(val),5,y+4);
+      }
+
+      const xStep=(w-pad.l-pad.r)/(labels.length-1);
+      labels.forEach((label,i)=>{
+        const x=pad.l+xStep*i;
+        ctx.fillText(label,x-12,h-9);
+      });
+
+      function drawSeries(series,color,fillColor){
+        ctx.beginPath();
+        series.forEach((v,i)=>{
+          const x=pad.l+xStep*i;
+          const y=pad.t+(h-pad.t-pad.b)*(1-(v-min)/(max-min));
+          i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+        });
+        ctx.strokeStyle=color;
+        ctx.lineWidth=3;
+        ctx.lineJoin="round";
+        ctx.lineCap="round";
+        ctx.stroke();
+
+        if(fillColor){
+          const lastX=pad.l+xStep*(series.length-1);
+          ctx.lineTo(lastX,h-pad.b);
+          ctx.lineTo(pad.l,h-pad.b);
+          ctx.closePath();
+          ctx.fillStyle=fillColor;
+          ctx.fill();
+        }
+
+        series.forEach((v,i)=>{
+          const x=pad.l+xStep*i;
+          const y=pad.t+(h-pad.t-pad.b)*(1-(v-min)/(max-min));
+          ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
+          ctx.fillStyle=color;ctx.fill();
+          ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.stroke();
+        });
+      }
+
+      if(compareValues) drawSeries(compareValues,colors[1],null);
+      drawSeries(values,colors[0],"rgba(32,182,111,.10)");
+    }
+
+    function drawEnergyChart(){
+      const range = Number(document.getElementById("dashboardRange")?.value || 7);
+      if(range===7){
+        drawLineChart("energyChart",[28,26,24,23,21,20,19],[31,30,29,28,27,26,25],
+          ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],["#20b66f","#a9d8c2"]);
+      }else{
+        drawLineChart("energyChart",[110,104,98,93,88,83],[122,120,117,114,110,107],
+          ["W1","W2","W3","W4","W5","W6"],["#20b66f","#a9d8c2"]);
+      }
+    }
+
+    function drawSavingsChart(){
+      drawLineChart("savingsChart",[6.4,8.9,10.6,12.1,13.9,15.18],null,
+        ["Jan","Feb","Mar","Apr","May","Jun"],["#0d8f91"]);
+    }
+
+    function downloadFile(filename,content,type="text/plain"){
+      const blob = new Blob([content],{type});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href=url;a.download=filename;a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    /* Event bindings */
+    document.getElementById("loginForm").addEventListener("submit",e=>{
+      e.preventDefault();
+      state.signedIn=true;
+      saveState();
+      document.getElementById("authScreen").classList.add("hidden");
+      document.getElementById("appShell").classList.remove("hidden");
+      renderAll();
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click",()=>{
+      state.signedIn=false;saveState();
+      document.getElementById("appShell").classList.add("hidden");
+      document.getElementById("authScreen").classList.remove("hidden");
+    });
+
+    document.querySelectorAll(".nav button").forEach(btn=>{
+      btn.addEventListener("click",()=>openPage(btn.dataset.page));
+    });
+
+    document.querySelectorAll("[data-page-jump]").forEach(btn=>{
+      btn.addEventListener("click",()=>openPage(btn.dataset.pageJump));
+    });
+
+    document.querySelectorAll("[data-close-modal]").forEach(btn=>{
+      btn.addEventListener("click",()=>closeModal(btn.dataset.closeModal));
+    });
+
+    document.querySelectorAll(".modal-backdrop").forEach(backdrop=>{
+      backdrop.addEventListener("click",e=>{
+        if(e.target===backdrop) backdrop.classList.remove("show");
+      });
+    });
+
+    document.getElementById("quickOptimizeBtn").addEventListener("click",optimizeNow);
+    document.getElementById("notificationBtn").addEventListener("click",()=>openPage("notifications"));
+    document.getElementById("addDeviceBtn").addEventListener("click",()=>openModal("deviceModal"));
+    document.getElementById("addSpaceBtn").addEventListener("click",()=>openModal("spaceModal"));
+    document.getElementById("addRuleBtn").addEventListener("click",()=>openModal("ruleModal"));
+
+    document.getElementById("dashboardRange").addEventListener("change",drawEnergyChart);
+
+    document.getElementById("globalSearch").addEventListener("input",()=>{
+      if(document.getElementById("devices").classList.contains("active")) renderDevices();
+    });
+
+    document.querySelectorAll(".filter-btn").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        state.selectedDeviceFilter=btn.dataset.filter;
+        saveState();
+        renderDevices();
+      });
+    });
+
+    document.getElementById("deviceForm").addEventListener("submit",e=>{
+      e.preventDefault();
+      const device={
+        id:"d"+Date.now(),
+        name:document.getElementById("newDeviceName").value.trim(),
+        icon:document.getElementById("newDeviceType").value,
+        space:document.getElementById("newDeviceSpace").value,
+        watts:Number(document.getElementById("newDeviceWatts").value),
+        on:true,usage:0.10,cost:0.57,savings:0.20,high:false
+      };
+      state.devices.push(device);
+      saveState();
+      closeModal("deviceModal");
+      e.target.reset();
+      renderAll();
+      showToast(`${device.name} paired successfully.`);
+    });
+
+    document.getElementById("spaceForm").addEventListener("submit",e=>{
+      e.preventDefault();
+      const space={
+        id:"s"+Date.now(),
+        name:document.getElementById("newSpaceName").value.trim(),
+        icon:document.getElementById("newSpaceIcon").value,
+        occupied:true,sensor:true
+      };
+      state.spaces.push(space);
+      saveState();
+      closeModal("spaceModal");
+      e.target.reset();
+      renderAll();
+      showToast(`${space.name} added.`);
+    });
+
+    document.getElementById("ruleForm").addEventListener("submit",e=>{
+      e.preventDefault();
+      const rule={
+        id:"r"+Date.now(),
+        icon:"⚙️",
+        name:document.getElementById("newRuleName").value.trim(),
+        trigger:document.getElementById("newRuleTrigger").value,
+        action:document.getElementById("newRuleAction").value,
+        enabled:true
+      };
+      state.automations.push(rule);
+      saveState();
+      closeModal("ruleModal");
+      e.target.reset();
+      renderAutomations();
+      showToast("Automation created.");
+    });
+
+    document.getElementById("markAllReadBtn").addEventListener("click",()=>{
+      state.notifications.forEach(n=>n.unread=false);
+      saveState();
+      renderNotifications();
+      showToast("All notifications marked as read.");
+    });
+
+    document.getElementById("rateInput").addEventListener("change",e=>{
+      state.rate=Number(e.target.value);
+      saveState();
+      showToast("Electricity rate updated.");
+    });
+
+    document.getElementById("currencySelect").addEventListener("change",e=>{
+      state.currency=e.target.value;
+      saveState();
+      renderAll();
+      showToast("Currency updated.");
+    });
+
+    document.getElementById("wifiSwitch").addEventListener("click",()=>{
+      state.wifi=!state.wifi;
+      saveState();renderSettings();
+      addNotification(state.wifi ? "📶":"📴",
+        state.wifi ? "Gateway connected":"Gateway offline",
+        state.wifi ? "The system synchronized successfully.":"Saved local automation rules will remain active.");
+      renderNotifications();
+      showToast(state.wifi ? "Gateway online.":"Gateway offline. Local rules remain active.");
+    });
+
+    document.getElementById("offlineFallbackSwitch").addEventListener("click",()=>{
+      state.offlineFallback=!state.offlineFallback;saveState();renderSettings();
+    });
+
+    document.getElementById("highUseSwitch").addEventListener("click",()=>{
+      state.highUseAlerts=!state.highUseAlerts;saveState();renderSettings();
+    });
+
+    document.getElementById("exportBtn").addEventListener("click",()=>{
+      const rows=[["Device","Space","Usage kWh/day","Cost","Savings","Status"]];
+      state.devices.forEach(d=>rows.push([
+        d.name,getSpace(d.space)?.name||"",d.usage.toFixed(2),d.cost.toFixed(2),d.savings.toFixed(2),d.on?"On":"Off"
+      ]));
+      const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");
+      downloadFile("ecoplug_energy_report.csv",csv,"text/csv");
+      showToast("CSV report downloaded.");
+    });
+
+    document.getElementById("backupBtn").addEventListener("click",()=>{
+      downloadFile("ecoplug_backup.json",JSON.stringify(state,null,2),"application/json");
+      showToast("Backup downloaded.");
+    });
+
+    document.getElementById("resetAppBtn").addEventListener("click",()=>{
+      if(!confirm("Reset all ECOPLUG data to the original version?")) return;
+      state=structuredClone(defaultState);
+      state.signedIn=true;
+      saveState();
+      renderAll();
+      showToast("Application reset.");
+    });
+
+    window.addEventListener("resize",()=>{
+      drawEnergyChart();
+      drawSavingsChart();
+    });
+
+    /* Initial setup */
+    function populateSpaceSelect(){
+      document.getElementById("newDeviceSpace").innerHTML =
+        state.spaces.map(s=>`<option value="${s.id}">${s.name}</option>`).join("");
+    }
+
+    function init(){
+      populateSpaceSelect();
+      if(state.signedIn){
+        document.getElementById("authScreen").classList.add("hidden");
+        document.getElementById("appShell").classList.remove("hidden");
+        renderAll();
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
